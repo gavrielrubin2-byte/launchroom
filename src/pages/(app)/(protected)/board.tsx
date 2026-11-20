@@ -10,7 +10,6 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
-  RecordScope,
   isWriterRole,
   useChannels,
   usePresence,
@@ -19,7 +18,6 @@ import {
   useUser,
 } from 'deepspace'
 import type { Channel, RecordData } from 'deepspace'
-import { messagingSchemas } from '../../../schemas/messaging-schema'
 import { ChatHeader } from '../../../components/messaging/chat/ChatHeader'
 import { MessageList } from '../../../components/messaging/chat/MessageList'
 
@@ -124,9 +122,7 @@ export default function BoardPage() {
           <>
             <PresenceStrip scopeId={`board:${activeId}`} />
             <ChatHeader channelId={activeId} />
-            <RecordScope roomId={`chat:${activeId}`} schemas={messagingSchemas}>
-              <MessageList channelId={activeId} />
-            </RecordScope>
+            <MessageList channelId={activeId} />
           </>
         ) : (
           <div className="flex flex-1 items-center justify-center">
