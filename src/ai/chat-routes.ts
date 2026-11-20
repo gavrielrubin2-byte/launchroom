@@ -165,7 +165,10 @@ export function registerAiChatRoutes(
     if (content.length > MAX_USER_CONTENT_LENGTH) {
       return c.json({ error: `content exceeds ${MAX_USER_CONTENT_LENGTH} chars` }, 413)
     }
-    const selectedModel = resolveDeepSpaceAgentModel(modelId, 'application')
+    // Launchroom pins the assistant to Haiku: the app developer-bills every
+    // member's chat, and Opus reservations are declined on the free tier
+    // (402). Haiku keeps the whole assistant on the included credits.
+    const selectedModel = resolveDeepSpaceAgentModel('claude-haiku-5-5', 'application')
     if (!selectedModel) {
       // Name the valid ids: the caller has no other way to learn them here.
       const modelIds = listDeepSpaceAgentModels('application').map((model) => model.id)
