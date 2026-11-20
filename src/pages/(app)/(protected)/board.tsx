@@ -30,7 +30,7 @@ const SEED_CHANNELS: { name: string; description: string }[] = [
 export default function BoardPage() {
   const { user } = useUser()
   const { channels, status, create } = useChannels()
-  const { markAsRead } = useReadReceipts()
+  const { markAsRead, receipts } = useReadReceipts()
   const [activeId, setActiveId] = useState<string | null>(null)
   const seededRef = useRef(false)
   const lastMarkedRef = useRef<string | null>(null)
@@ -75,8 +75,12 @@ export default function BoardPage() {
     if (!activeId || !canTrackReadState) return
     if (lastMarkedRef.current === activeId) return
     lastMarkedRef.current = activeId
-    markAsRead(activeId)
-  }, [activeId, canTrackReadState, markAsRead])
+    // markAsRead inserts a receipt row; calling it twice for the same
+    // channel+user violates the collection's uniqueness rule and surfaces a
+    // duplicate-record toast, so only mark channels with no receipt yet.
+    const alreadyMarked = receipts.some((r) => r.data.channelId === activeId)
+    if (!alreadyMarked) markAsRead(activeId)
+  }, [activeId, canTrackReadState, markAsRead, receipts])
 
   if (status !== 'ready') {
     return (
