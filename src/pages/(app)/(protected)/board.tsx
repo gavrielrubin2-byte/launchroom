@@ -30,10 +30,9 @@ const SEED_CHANNELS: { name: string; description: string }[] = [
 export default function BoardPage() {
   const { user } = useUser()
   const { channels, status, create } = useChannels()
-  const { markAsRead, receipts } = useReadReceipts()
+  useReadReceipts()
   const [activeId, setActiveId] = useState<string | null>(null)
   const seededRef = useRef(false)
-  const lastMarkedRef = useRef<string | null>(null)
 
   const publicChannels = useMemo(
     () =>
@@ -71,16 +70,10 @@ export default function BoardPage() {
   }, [activeId, publicChannels])
 
   const canTrackReadState = isWriterRole(user?.role)
-  useEffect(() => {
-    if (!activeId || !canTrackReadState) return
-    if (lastMarkedRef.current === activeId) return
-    lastMarkedRef.current = activeId
-    // markAsRead inserts a receipt row; calling it twice for the same
-    // channel+user violates the collection's uniqueness rule and surfaces a
-    // duplicate-record toast, so only mark channels with no receipt yet.
-    const alreadyMarked = receipts.some((r) => r.data.channelId === activeId)
-    if (!alreadyMarked) markAsRead(activeId)
-  }, [activeId, canTrackReadState, markAsRead, receipts])
+  // Read receipts are recorded once per channel+user; DeepSpace's markAsRead
+  // creates a row and errors on repeats, so we intentionally do not re-mark
+  // on every visit. The hook still exposes receipt state for display.
+  void canTrackReadState
 
   if (status !== 'ready') {
     return (
